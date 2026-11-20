@@ -34,8 +34,37 @@ public class SupplierDAO extends DAO {
         return list;
     }
 
-    /** Thêm nhà cung cấp mới; gán id sinh ra vào s. @return true nếu thành công */
+    /**
+     * Thêm nhà cung cấp mới; gán id sinh ra vào s.
+     * Nếu đã có nhà cung cấp trùng tên, số điện thoại hoặc email thì không thêm,
+     * nạp thông tin nhà cung cấp đã có vào s và trả false.
+     * @return true nếu thêm thành công
+     */
     public boolean saveSupplier(Supplier0 s) {
+        String sqlCheck = "SELECT * FROM tblSupplier0 WHERE LOWER(TRIM(name)) = LOWER(TRIM(?))"
+                + " OR (? <> '' AND phoneNumber = ?) OR (? <> '' AND LOWER(email) = LOWER(?)) LIMIT 1";
+        try (PreparedStatement ps = con.prepareStatement(sqlCheck)) {
+            String phone = s.getPhoneNumber() == null ? "" : s.getPhoneNumber().trim();
+            String email = s.getEmail() == null ? "" : s.getEmail().trim();
+            ps.setString(1, s.getName());
+            ps.setString(2, phone);
+            ps.setString(3, phone);
+            ps.setString(4, email);
+            ps.setString(5, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                s.setId(rs.getInt("id"));
+                s.setName(rs.getString("name"));
+                s.setAddress(rs.getString("address"));
+                s.setPhoneNumber(rs.getString("phoneNumber"));
+                s.setEmail(rs.getString("email"));
+                s.setDescription(rs.getString("description"));
+                return false;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
         String sql = "INSERT INTO tblSupplier0(name, address, phoneNumber, email, description) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, s.getName());

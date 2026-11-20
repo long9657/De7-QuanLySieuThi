@@ -40,6 +40,9 @@ public class SupplierServlet extends HttpServlet {
         if (supplierDAO.saveSupplier(s)) {
             list.add(s);
             req.setAttribute("message", "Thêm nhà cung cấp thành công");
+        } else if (s.getId() > 0) {
+            list.add(s);
+            req.setAttribute("message", "Nhà cung cấp đã tồn tại (trùng tên, số điện thoại hoặc email), hãy chọn trong danh sách");
         } else {
             req.setAttribute("message", "Thêm nhà cung cấp thất bại");
         }
