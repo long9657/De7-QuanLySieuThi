@@ -1,4 +1,5 @@
 target/
+src/main/resources/db.properties
 data/
 *.mv.db
 *.trace.db

@@ -41,31 +41,60 @@ public class ProductDAO extends DAO {
         return list;
     }
 
+    /** Tìm theo tên trong toàn bộ danh mục để gợi ý cho trang Thêm mặt hàng. */
+    public ArrayList<Product0> findCatalogByName(String name) throws SQLException {
+        ArrayList<Product0> products = new ArrayList<>();
+        String sql = "SELECT * FROM tblProduct0 WHERE LOWER(name) LIKE LOWER(?) ORDER BY name, id";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, "%" + name + "%");
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Product0 product = new Product0();
+                    readProduct(rs, product);
+                    products.add(product);
+                }
+            }
+        }
+        return products;
+    }
+
+    private static void readProduct(ResultSet rs, Product0 p) throws SQLException {
+        p.setId(rs.getInt("id"));
+        p.setName(rs.getString("name"));
+        p.setType(rs.getString("type"));
+        p.setDescription(rs.getString("description"));
+        p.setPrice(rs.getFloat("price"));
+        p.setQuantity(rs.getInt("quantity"));
+    }
+
     /**
-     * Lưu mặt hàng cho nhà cung cấp s.
-     * - Mặt hàng mới hoàn toàn (chưa có tên trùng, không phân biệt hoa thường): thêm vào tblProduct0
-     *   (tồn kho ban đầu = 0) và tạo dòng SupplierProduct0 (giá nhập = 0 cho tới lần nhập đầu).
-     * - Mặt hàng đã có (do nhà cung cấp khác cung cấp): không thêm mặt hàng mới, chỉ tạo dòng
-     *   SupplierProduct0 nối mặt hàng cũ với s (đã nối rồi thì giữ nguyên); p nhận lại thông tin mặt hàng cũ.
-     * @return true nếu lưu thành công; p.id là id của mặt hàng (mới hoặc cũ)
+     * Dùng lại mặt hàng theo ID nếu người dùng chọn từ danh mục, hoặc tìm theo tên
+     * nếu họ nhập tay. Chỉ tạo mặt hàng mới khi tên nhập tay chưa tồn tại.
+     * Liên kết đã có với nhà cung cấp giữ nguyên giá nhập gần nhất.
      */
     public boolean saveProduct(Product0 p, Supplier0 s) {
-        String sqlFind = "SELECT * FROM tblProduct0 WHERE LOWER(TRIM(name)) COLLATE utf8mb4_bin = LOWER(TRIM(?)) LIMIT 1";
+        boolean selected = p.getId() > 0;
+        String sqlFind = selected ? "SELECT * FROM tblProduct0 WHERE id = ?"
+                : "SELECT * FROM tblProduct0 WHERE LOWER(TRIM(name)) COLLATE utf8mb4_bin = LOWER(TRIM(?)) LIMIT 1";
         String sql = "INSERT INTO tblProduct0(name, type, description, price, quantity) VALUES (?, ?, ?, ?, 0)";
-        String sqlLink = "INSERT IGNORE INTO tblSupplierProduct0(supplierId, productId) VALUES (?, ?)";   // importPrice mặc định 0
+        String sqlLink = "INSERT INTO tblSupplierProduct0(supplierId, productId) VALUES (?, ?) "
+                + "ON DUPLICATE KEY UPDATE importPrice = importPrice";
         try {
             con.setAutoCommit(false);
-            PreparedStatement pf = con.prepareStatement(sqlFind);
-            pf.setString(1, p.getName());
-            ResultSet rs = pf.executeQuery();
-            if (rs.next()) {                                   // mặt hàng đã có → dùng lại
-                p.setId(rs.getInt("id"));
-                p.setName(rs.getString("name"));
-                p.setType(rs.getString("type"));
-                p.setDescription(rs.getString("description"));
-                p.setPrice(rs.getFloat("price"));
-                p.setQuantity(rs.getInt("quantity"));
-            } else {                                           // mặt hàng mới hoàn toàn → thêm
+            boolean found;
+            try (PreparedStatement pf = con.prepareStatement(sqlFind)) {
+                if (selected) pf.setInt(1, p.getId());
+                else pf.setString(1, p.getName());
+                try (ResultSet rs = pf.executeQuery()) {
+                    found = rs.next();
+                    if (found) readProduct(rs, p);
+                }
+            }
+            if (!found && selected) {
+                con.rollback();
+                return false;
+            }
+            if (!found) {
                 PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 ps.setString(1, p.getName().trim());
                 ps.setString(2, p.getType());

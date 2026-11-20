@@ -2,6 +2,7 @@ package controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -24,6 +25,32 @@ public class ProductServlet extends HttpServlet {
             throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
         HttpSession session = req.getSession();
+        if ("catalog".equals(req.getParameter("mode"))) {
+            if (!(session.getAttribute("user") instanceof WarehouseStaff0)
+                    || session.getAttribute("invoice") == null) {
+                res.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
+            String term = req.getParameter("txtProductName");
+            ArrayList<Product0> products;
+            try {
+                products = productDAO.findCatalogByName(term == null ? "" : term.trim());
+            } catch (SQLException e) {
+                throw new ServletException("Không tải được danh mục mặt hàng", e);
+            }
+            res.setContentType("application/json; charset=UTF-8");
+            PrintWriter out = res.getWriter();
+            out.print("[");
+            for (int i = 0; i < products.size(); i++) {
+                Product0 p = products.get(i);
+                if (i > 0) out.print(",");
+                out.print("{\"id\":" + p.getId() + ",\"name\":" + json(p.getName())
+                        + ",\"type\":" + json(p.getType()) + ",\"price\":" + p.getPrice()
+                        + ",\"description\":" + json(p.getDescription()) + "}");
+            }
+            out.print("]");
+            return;
+        }
         String supplierId = req.getParameter("supplierId");
         if (supplierId != null) {
             int id = Integer.parseInt(supplierId);
@@ -79,10 +106,26 @@ public class ProductServlet extends HttpServlet {
             return;
         }
         Product0 p = new Product0();
-        p.setName(req.getParameter("txtName"));
-        p.setType(req.getParameter("txtType"));
-        p.setDescription(req.getParameter("txtDescription"));
-        p.setPrice(Float.parseFloat(req.getParameter("txtPrice")));
+        String selectedId = req.getParameter("selectedProductId");
+        try {
+            if (selectedId != null && !selectedId.isBlank()) {
+                p.setId(Integer.parseInt(selectedId));
+                if (p.getId() <= 0) throw new NumberFormatException();
+            } else {
+                p.setName(req.getParameter("txtName"));
+                p.setType(req.getParameter("txtType"));
+                p.setDescription(req.getParameter("txtDescription"));
+                String price = req.getParameter("txtPrice");
+                if (price == null) throw new NumberFormatException();
+                p.setPrice(Float.parseFloat(price));
+                if (!Float.isFinite(p.getPrice()) || p.getPrice() < 0
+                        || p.getName() == null || p.getName().isBlank()) throw new NumberFormatException();
+            }
+        } catch (NumberFormatException e) {
+            req.setAttribute("message", "Thông tin mặt hàng không hợp lệ.");
+            req.getRequestDispatcher("/view/warehousestaff/AddProductUI0.jsp").forward(req, res);
+            return;
+        }
         if (productDAO.saveProduct(p, inv.getSupplier())) {
             ArrayList<SupplierProduct0> list = (ArrayList<SupplierProduct0>) session.getAttribute("listProduct");
             if (list == null) list = new ArrayList<>();
