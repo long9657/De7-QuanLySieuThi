@@ -1,0 +1,7 @@
+<%@ page pageEncoding="UTF-8" %>
+<%@ page import="model.*, java.util.*" %>
+<%! static String esc(Object o) { return o == null ? "" : o.toString().replace("&","&amp;").replace("\"","&quot;").replace("<","&lt;"); }
+    static String money(float v) { return String.format("%,.0f", v).replace(',', '.'); } %>
+<% WarehouseStaff0 user = (WarehouseStaff0) session.getAttribute("user");
+   if (user == null) { response.sendRedirect(request.getContextPath() + "/view/user/LoginUI0.jsp"); return; }
+   String ctx = request.getContextPath(); %>

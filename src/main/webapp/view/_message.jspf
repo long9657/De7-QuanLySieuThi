@@ -1,0 +1,8 @@
+<%@ page pageEncoding="UTF-8" %>
+<% String message = (String) request.getAttribute("message");
+   if (message == null && session.getAttribute("message") != null) { // thông báo gửi kèm redirect
+     message = (String) session.getAttribute("message"); session.removeAttribute("message"); }
+   if (message != null) {
+     boolean msgOk = message.contains("thành công"); %>
+  <div id="message" class="msg <%= msgOk ? "ok" : "" %>"><%= message.replace("&","&amp;").replace("<","&lt;") %></div>
+<% } %>

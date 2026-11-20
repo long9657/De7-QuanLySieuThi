@@ -1,0 +1,69 @@
+/* Giao diện đơn giản kiểu bài mẫu: nền xám, khung trắng, nút "Quay lại" góc trái,
+   tiêu đề viết hoa căn giữa, bảng căn giữa, nút xác nhận xanh lá ở giữa. */
+* { box-sizing: border-box; }
+body { margin: 0; background: #f0f0f0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #111; }
+.card { max-width: 1100px; margin: 40px auto; background: #fff; border: 1px solid #ddd; border-radius: 4px;
+        padding: 18px 24px 28px; }
+.card.narrow { max-width: 420px; }
+.card.medium { max-width: 760px; }
+h1 { font-size: 22px; font-weight: 700; text-transform: uppercase; text-align: center; margin: 6px 0 20px; }
+h2 { font-size: 15px; margin: 22px 0 8px; }
+p.info { margin: 6px 0; }
+
+/* nút */
+button, .btn { display: inline-block; height: 32px; padding: 0 14px; border-radius: 4px; border: 1px solid #007bff;
+               background: #007bff; color: #fff; font: inherit; font-size: 13px; line-height: 30px; cursor: pointer;
+               text-decoration: none; text-align: center; white-space: nowrap; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+button.ok, .btn.ok { background: #28a745; border-color: #28a745; }
+button.back, .btn.back, button.gray, .btn.gray { background: #6c757d; border-color: #6c757d; }
+button.mini, a.mini { height: auto; padding: 1px 6px; line-height: 18px; font-size: 13px; color: #111; background: #efefef;
+                      border: 1px solid #767676; border-radius: 2px; }
+.back { margin-bottom: 4px; }
+.center { text-align: center; margin-top: 20px; }
+.center button, .center .btn { min-width: 90px; margin: 0 6px; }
+.stack { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 10px; }
+.stack .btn, .stack button { min-width: 240px; }
+
+/* form */
+label { display: block; font-weight: 700; font-size: 13px; margin: 12px 0 5px; }
+label.inline { display: inline; font-weight: 400; }
+input[type=text], input[type=password], input[type=email], input[type=date], input[type=number] {
+  width: 100%; height: 32px; padding: 0 8px; border: 1px solid #ccc; border-radius: 4px; font: inherit; }
+input:focus { outline: none; border-color: #80bdff; box-shadow: 0 0 0 2px rgba(0,123,255,.2); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }
+.row { display: flex; gap: 10px; align-items: center; }
+.row .grow { flex: 1; }
+.row .right { margin-left: auto; }
+
+/* bảng */
+table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+th, td { border: 1px solid #ccc; padding: 7px 8px; text-align: center; }
+th { background: #f5f5f5; font-weight: 700; }
+td.left { text-align: left; }
+td.num, th.num { text-align: right; }
+tfoot td { font-weight: 700; }
+tr.empty td { color: #888; padding: 22px 8px; }
+
+/* thông báo */
+.msg { padding: 9px 12px; border-radius: 4px; margin-bottom: 12px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.msg.ok { background: #d4edda; color: #155724; border-color: #c3e6cb; }
+
+/* trang nhập hàng: ô tìm có danh sách gợi ý */
+.hidden { display: none !important; }
+.search { position: relative; }
+.pop { display: none; position: absolute; left: 0; right: 0; top: 100%; z-index: 10; background: #fff; border: 1px solid #ccc;
+       box-shadow: 0 4px 10px rgba(0,0,0,.15); max-height: 300px; overflow-y: auto; }
+.pop .opt { padding: 7px 10px; cursor: pointer; border-bottom: 1px solid #eee; }
+.pop .opt small { color: #666; }
+.pop .opt.on, .pop .opt:hover { background: #e8f2ff; }
+.pop .none { padding: 10px; color: #666; }
+.picked { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; margin-top: 12px; padding: 10px 12px;
+          border: 1px solid #ccc; border-radius: 4px; background: #fafafa; }
+.picked .pname { flex: 1; min-width: 200px; align-self: center; }
+.picked label { margin: 0; display: flex; flex-direction: column; gap: 3px; }
+.picked input[type=number] { width: 130px; }
+input.cell { width: 110px; height: 26px; text-align: center; }
+
+@media print { .back, #btnPrint, .msg { display: none; } body { background: #fff; } .card { border: none; margin: 0; } }
+@media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } .card { margin: 12px; } }
