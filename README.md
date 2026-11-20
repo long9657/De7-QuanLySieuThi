@@ -1,7 +1,9 @@
 # QLST – bản chạy thử (MVC – Servlet)
 
-Code `model`, `dao` (trừ `DAO.java`), `controller` (4 Servlet) sinh nguyên văn từ tài liệu
-`7_B23DCCN500_HOAN_CHINH_SERVLET.docx`. Phần chỉ dùng để chạy thử:
+Mã nguồn cho hai chức năng của đề 7: khách hàng đăng kí thành viên và nhân viên kho nhập hàng
+từ nhà cung cấp. Tên lớp, phương thức và trang JSP giống với báo cáo phân tích – thiết kế.
+
+Một số file chỉ phục vụ chạy thử:
 
 | File | Vai trò |
 |---|---|

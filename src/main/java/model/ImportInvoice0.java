@@ -32,7 +32,7 @@ public class ImportInvoice0 {
         importDate = new Date();
     }
 
-    /** Thêm một dòng hàng vào phiếu và cộng dồn tổng tiền (thay cho addDetail() pha phân tích). */
+    /** Thêm một dòng hàng vào phiếu và cộng dồn tổng tiền. */
     public void addDetail(ImportInvoiceDetail0 d) {
         details.add(d);
         totalAmount += d.getAmount();
